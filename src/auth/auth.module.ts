@@ -4,7 +4,7 @@ import { AuthController } from './auth.controller';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
-import { UserModule } from 'src/user/user.module';
+import { UsersModule } from 'src/users/users.module';
 
 @Module({
   imports: [
@@ -13,7 +13,7 @@ import { UserModule } from 'src/user/user.module';
       secret: 'JWT_SECRET', // daha sonra .env'e taşınmalı
       signOptions: { expiresIn: '1d' },
     }),
-    UserModule,
+    UsersModule,
   ],
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],

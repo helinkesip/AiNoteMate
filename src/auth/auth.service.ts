@@ -1,59 +1,49 @@
 import { ConflictException, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { UserService } from 'src/user/user.service';
+import { UsersService } from 'src/users/users.service';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-    constructor(
-        private jwtService: JwtService,
-        private userService: UserService
-    ){}
+  constructor(
+    private jwtService: JwtService,
+    private usersService: UsersService,
+  ) {}
 
-
-    async validateUser(email: string, pass:  string): Promise<any>{
-        const user = await this.userService.findOne(email);
-        if( user && user.password === pass){
-            const {password, ...result} = user;
-            return result;
+  async validateUser(email: string, pass: string): Promise<any> {
+    const user = await this.usersService.findOne(email);
+    if (user && await bcrypt.compare(pass, user.password)) {
+      const { password, ...result } = user;
+      return result;
     }
     return null;
   }
 
-  async login(user: any){
-    const payload = {sub : user.id};
-    return{
-        access_token: this.jwtService.sign({sub: user.id, email: user.email}),
+  async login(user: any) {
+    const payload = { sub: user.id, email: user.email };
+    return {
+      access_token: this.jwtService.sign(payload),
     };
   }
 
-
-  async register(user: any){
-    const existingUser = await this.userService.findOne(user.email);
-    if(existingUser){
-        throw new ConflictException('User already exists');
+  async register(user: any) {
+    const existingUser = await this.usersService.findOne(user.email);
+    if (existingUser) {
+      throw new ConflictException('User already exists');
     }
-    const hashed
-    
 
+    const hashedPassword = await bcrypt.hash(user.pass, 10);
 
+    const createdUser = await this.usersService.create({
+      email: user.email,
+      password: hashedPassword,
+      role: 'user',
+    });
 
+    const payload = { sub: createdUser.id, email: createdUser.email };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
 }
