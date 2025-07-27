@@ -11,8 +11,15 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
+    if (!email || !pass) {
+      return null;
+    }
     const user = await this.usersService.findOne(email);
-    if (user && await bcrypt.compare(pass, user.password)) {
+    if (!user || !user.password) {
+      return null;
+    }
+    const isMatch = await bcrypt.compare(pass, user.password);
+    if (isMatch) {
       const { password, ...result } = user;
       return result;
     }
@@ -32,7 +39,7 @@ export class AuthService {
       throw new ConflictException('User already exists');
     }
 
-    const hashedPassword = await bcrypt.hash(user.pass, 10);
+    const hashedPassword = await bcrypt.hash(user.password, 10);
 
     const createdUser = await this.usersService.create({
       email: user.email,

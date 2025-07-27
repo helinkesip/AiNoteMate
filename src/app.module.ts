@@ -4,7 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { User } from './users/user.entity';
-
+import { OrganizationsModule } from './organizations/organizations.module';
+import { Organization } from './organizations/organization.entity';
 
 
 @Module({
@@ -14,13 +15,14 @@ import { User } from './users/user.entity';
     TypeOrmModule.forRoot({
       type: 'postgres',
       url: process.env.DATABASE_URL,
-      entities: [User],
+      entities: [User, Organization],
       synchronize: true, // prod'da false olacak!
       autoLoadEntities: true,
     }),
 
     AuthModule,
     UsersModule,
+    OrganizationsModule,
   ],
 })
 export class AppModule {}
